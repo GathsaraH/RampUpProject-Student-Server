@@ -20,15 +20,17 @@ export class StudentService {
     return await this.studentRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} student`;
+  async findOne(id: string): Promise<Student> {
+    return await this.studentRepository.findOne(id);
   }
 
-  update(id: number, updateStudentInput: UpdateStudentInput) {
-    return `This action updates a #${id} student`;
+  async update(id: string, updateStudentInput: UpdateStudentInput) {
+    await this.studentRepository.update({ id }, updateStudentInput);
+    return await this.studentRepository.findOne({ id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} student`;
+  async remove(id: string) {
+    await this.studentRepository.delete({ id });
+    return { deleted: true };
   }
 }

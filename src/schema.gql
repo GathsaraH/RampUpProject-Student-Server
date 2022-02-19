@@ -18,13 +18,13 @@ scalar DateTime
 
 type Query {
   getAllStudent: [Student!]!
-  student(id: Int!): [Student!]!
+  findOneStudent(id: String!): [Student!]!
 }
 
 type Mutation {
   createStudent(createStudentInput: CreateStudentInput!): Student!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
-  removeStudent(id: Int!): Student!
+  deleteStudent(id: String!): Student!
 }
 
 input CreateStudentInput {
@@ -36,10 +36,10 @@ input CreateStudentInput {
 }
 
 input UpdateStudentInput {
-  name: String
-  gender: String
-  address: String
-  mobile_no: String
-  dob: DateTime
-  id: Int!
+  name: String!
+  gender: String!
+  address: String!
+  mobile_no: String!
+  dob: DateTime!
+  id: String!
 }

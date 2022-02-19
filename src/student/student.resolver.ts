@@ -3,9 +3,8 @@ import { StudentService } from './student.service';
 import { Student } from './entities/student.entity';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
-import { Response } from 'express';
 import * as Joi from '@hapi/joi';
-import { HttpStatus, Res } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 
 @Resolver(() => Student)
 export class StudentResolver {
@@ -14,9 +13,7 @@ export class StudentResolver {
   @Mutation(() => Student, { name: 'createStudent' })
   async createStudent(
     @Args('createStudentInput') createStudentInput: CreateStudentInput,
-    @Res() response: Response,
   ) {
-    console.log('createStudentInput', createStudentInput);
     const schema = Joi.object({
       name: Joi.string().required(),
       gender: Joi.string().required(),
@@ -26,22 +23,18 @@ export class StudentResolver {
     });
     const validation = schema.validate(createStudentInput);
     if (validation.error) {
-      response.status(401).send(validation.error);
+      // response.status(401).send(validation.error);
+      return validation.error;
     } else {
       const studentModal: CreateStudentInput = validation.value;
       try {
         const student = await this.studentService.create(studentModal);
         if (student) {
-          // response.status(201).send({
-          //   statusCode: HttpStatus.OK,
-          //   message: 'Student created successfully',
-          //   student,
-          // });
           return student;
         }
       } catch (error) {
         console.log(error);
-        response.status(401).send(error);
+        return error;
       }
     }
   }
@@ -52,31 +45,62 @@ export class StudentResolver {
       return await this.studentService.findAll();
     } catch (error) {
       console.log(error);
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Student not found',
-        error,
-      };
+      return error;
     }
   }
 
-  @Query(() => [Student], { name: 'student' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.studentService.findOne(id);
+  @Query(() => [Student], { name: 'findOneStudent' })
+  async findOne(@Args('id') id: string) {
+    try {
+      return await this.studentService.findOne(id);
+    } catch (error) {
+      return error;
+    }
   }
 
-  @Mutation(() => Student)
-  updateStudent(
+  @Mutation(() => Student, { name: 'updateStudent' })
+  async updateStudent(
     @Args('updateStudentInput') updateStudentInput: UpdateStudentInput,
   ) {
-    return this.studentService.update(
-      updateStudentInput.id,
-      updateStudentInput,
-    );
+    const schema = Joi.object({
+      id: Joi.string().required(),
+      name: Joi.string().required(),
+      gender: Joi.string().required(),
+      address: Joi.string().required(),
+      mobile_no: Joi.string().required(),
+      dob: Joi.date().iso(),
+    });
+    const validation = schema.validate(updateStudentInput);
+    if (validation.error) {
+      // response.status(401).send(validation.error);
+      return validation.error;
+    } else {
+      const studentModal: UpdateStudentInput = validation.value;
+      try {
+        const updateStudent = await this.studentService.update(
+          studentModal.id,
+          studentModal,
+        );
+        if (updateStudent) {
+          return updateStudent;
+        }
+      } catch (error) {
+        console.log(error);
+        return error;
+      }
+    }
   }
 
-  @Mutation(() => Student)
-  removeStudent(@Args('id', { type: () => Int }) id: number) {
-    return this.studentService.remove(id);
+  @Mutation(() => Student, { name: 'deleteStudent' })
+  async removeStudent(@Args('id') id: string) {
+    try {
+      const deleteUser = await this.studentService.remove(id);
+      if (deleteUser) {
+        return deleteUser;
+      }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 }
